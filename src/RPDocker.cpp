@@ -10,6 +10,9 @@ namespace KCL_rosplan {
 		ROS_INFO("KCL: (Docker) waiting for action server to start on /dock_drive_action");
 		action_client.waitForServer();
 
+		// knowledge interface
+		update_knowledge_client = nh.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>("/kcl_rosplan/update_knowledge_base");
+
 		// create publishers
 		action_feedback_pub = nh.advertise<rosplan_dispatch_msgs::ActionFeedback>("/kcl_rosplan/action_feedback", 10, true);
 		cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 10, true);
@@ -38,7 +41,21 @@ namespace KCL_rosplan {
 
 				actionlib::SimpleClientGoalState state = action_client.getState();
 				ROS_INFO("KCL: (Docker) action finished: %s", state.toString().c_str());
-				
+
+				// predicate
+				rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
+				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
+				updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::DOMAIN_ATTRIBUTE;
+				updatePredSrv.request.knowledge.attribute_name = "undocked";
+				diagnostic_msgs::KeyValue pair;
+				pair.key = "v";
+				pair.value = "kenny";
+				updatePredSrv.request.knowledge.values.push_back(pair);
+				update_knowledge_client.call(updatePredSrv);
+
+				ros::Rate big_rate(0.5);
+				big_rate.sleep();
+
 				// publish feedback (achieved)
 				 rosplan_dispatch_msgs::ActionFeedback fb;
 				fb.action_id = msg->action_id;
@@ -84,6 +101,20 @@ namespace KCL_rosplan {
 				rate.sleep();
 				count++;
 			}
+
+			// predicate
+			rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
+			updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
+			updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::DOMAIN_ATTRIBUTE;
+			updatePredSrv.request.knowledge.attribute_name = "undocked";
+			diagnostic_msgs::KeyValue pair;
+			pair.key = "v";
+			pair.value = "kenny";
+			updatePredSrv.request.knowledge.values.push_back(pair);
+			update_knowledge_client.call(updatePredSrv);
+
+			ros::Rate big_rate(0.5);
+			big_rate.sleep();
 
 			// publish feedback (achieved)
 			fb.status = "action achieved";

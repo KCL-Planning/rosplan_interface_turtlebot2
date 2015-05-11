@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <actionlib/client/simple_action_client.h>
+#include "rosplan_knowledge_msgs/KnowledgeItem.h"
+#include "rosplan_knowledge_msgs/KnowledgeUpdateService.h"
 #include "rosplan_dispatch_msgs/ActionDispatch.h"
 #include "rosplan_dispatch_msgs/ActionFeedback.h"
 #include "geometry_msgs/Twist.h"
@@ -23,6 +25,7 @@ namespace KCL_rosplan {
 
 	private:
 
+		ros::ServiceClient update_knowledge_client;
 		ros::Publisher action_feedback_pub;
 		ros::Publisher cmd_vel_pub;
 		actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> action_client;
