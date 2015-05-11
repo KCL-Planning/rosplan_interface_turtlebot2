@@ -37,7 +37,7 @@ include_directories(
 )
 
 ## Declare cpp executables
-add_executable(rodocker src/RPDocker.cpp)
+add_executable(rpdocker src/RPDocker.cpp)
 
 ## Specify libraries against which to link a library or executable target
-target_link_libraries(rodocker ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(rpdocker ${catkin_LIBRARIES} ${Boost_LIBRARIES})
