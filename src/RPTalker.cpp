@@ -6,6 +6,7 @@ namespace KCL_rosplan {
 	/* constructor */
 	RPTalker::RPTalker(ros::NodeHandle &nh) {
 		// nothing yet...
+		runCommand("espeak -v en-sc -s 150 \"I am ready\"");
 	}
 
 	/**

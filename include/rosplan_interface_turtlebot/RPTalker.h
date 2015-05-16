@@ -22,6 +22,9 @@ namespace KCL_rosplan {
 	{
 
 	private:
+
+		std::string runCommand(std::string cmd);
+
 	public:
 
 		/* constructor */
