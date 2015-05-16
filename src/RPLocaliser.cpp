@@ -27,7 +27,7 @@ namespace KCL_rosplan {
 			fb.action_id = msg->action_id;
 			fb.status = "action enabled";
 			action_feedback_pub.publish(fb);
-/*
+
 			geometry_msgs::Twist base_cmd;
 			base_cmd.linear.x = base_cmd.linear.y = base_cmd.angular.z = 0;
 			base_cmd.angular.x = base_cmd.angular.y = 0;
@@ -40,18 +40,6 @@ namespace KCL_rosplan {
 				cmd_vel_pub.publish(base_cmd);
 				rate.sleep();
 			}
-
-			
-			geometry_msgs::PoseStamped pBase, pMap;
-			pBase.header.frame_id = "base_link";
-			pBase.pose.position.x = 0.0;
-			pBase.pose.position.y = 0.0;
-			pBase.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
-			ros::Time current_transform = ros::Time::now();
-			listener.getLatestCommonTime(pBase.header.frame_id, "map", current_transform, NULL);
-			pBase.header.stamp = current_transform;
-			listener.transformPose("map", pBase, pMap);
-			*/
 
 			// get pose of the robot
 			geometry_msgs::PoseStamped pBase, pMap;
@@ -67,9 +55,19 @@ namespace KCL_rosplan {
 				ROS_ERROR("KCL: (Localiser) transforme error: %s", ex.what());
 			}
 
-			std::cout << "OUTPUT: " << pMap.pose.position.x << " " << pMap.pose.position.y << std::endl;
+			double d = 10;
+			std::string wpName = "";
+			for (std::map<std::string,geometry_msgs::PoseStamped>::iterator wit=waypoints.begin(); wit!=waypoints.end(); ++wit) {
+				double vX = wit->second.pose.position.x - pBase.pose.position.x;
+				double vY = wit->second.pose.position.y - pBase.pose.position.y;
+				if(sqrt(vX*vX + vY*vY) < d) {
+					wpName = wit->first;
+					d = sqrt(vX*vX + vY*vY);
+				}
+			}
+			std::cout << "OUTPUT: " << wpName << std::endl;
 
-/*			// predicate
+			// predicate
 			rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
 			updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
 			updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::DOMAIN_ATTRIBUTE;
@@ -79,7 +77,7 @@ namespace KCL_rosplan {
 			pair.value = "kenny";
 			updatePredSrv.request.knowledge.values.push_back(pair);
 			update_knowledge_client.call(updatePredSrv);
-*/
+
 			ROS_INFO("KCL: (Localiser) action complete");
 
 			ros::Rate big_rate(0.5);
@@ -90,6 +88,53 @@ namespace KCL_rosplan {
 			action_feedback_pub.publish(fb);
 		}
 	}
+
+	/**
+	 * parses a pose with yaw from strings: "[f, f, f]"
+	 */
+	 void RPLocaliser::parsePose(geometry_msgs::PoseStamped &pose, std::string line) {
+
+		int curr,next;
+		curr=line.find("[")+1;
+		next=line.find(",",curr);
+
+		pose.pose.position.x = (double)atof(line.substr(curr,next-curr).c_str());
+		curr=next+1; next=line.find(",",curr);
+
+		pose.pose.position.y = (double)atof(line.substr(curr,next-curr).c_str());
+		curr=next+1; next=line.find(",",curr);
+
+		pose.pose.orientation.x = 0.0;
+		pose.pose.orientation.y = 0.0;
+		pose.pose.orientation.w = (double)atof(line.substr(curr,next-curr).c_str());
+		pose.pose.orientation.z = sqrt(1 - pose.pose.orientation.w * pose.pose.orientation.w);
+	}
+
+	bool RPLocaliser::setupRoadmap(std::string filename) {
+
+		ros::NodeHandle nh("~");
+
+		// clear previous roadmap from knowledge base
+		ROS_INFO("KCL: (RPLocaliser) Loading roadmap from file");
+
+		// load configuration file
+		std::ifstream infile(filename.c_str());
+		std::string line;
+		int curr,next;
+		while(!infile.eof()) {
+			// read waypoint
+			std::getline(infile, line);
+			curr=line.find("[");
+			std::string name = line.substr(0,curr);
+
+			// data
+			geometry_msgs::PoseStamped pose;
+			pose.header.frame_id = "map";
+			parsePose(pose, line);
+			waypoints[name] = pose;
+		}
+	}
+
 } // close namespace
 
 	/*-------------*/
@@ -101,11 +146,16 @@ namespace KCL_rosplan {
 		ros::init(argc, argv, "rosplan_interface_localisation");
 		ros::NodeHandle nh;
 
+		// params
+		std::string filename("waypoints.txt");
+		nh.param("waypoint_file", filename, filename);
+
 		// create PDDL action subscriber
-		KCL_rosplan::RPLocaliser rpdo(nh);
+		KCL_rosplan::RPLocaliser rplo(nh);
+		rplo.setupRoadmap(filename);
 	
 		// listen for action dispatch
-		ros::Subscriber ds = nh.subscribe("/kcl_rosplan/action_dispatch", 1000, &KCL_rosplan::RPLocaliser::dispatchCallback, &rpdo);
+		ros::Subscriber ds = nh.subscribe("/kcl_rosplan/action_dispatch", 1000, &KCL_rosplan::RPLocaliser::dispatchCallback, &rplo);
 		ROS_INFO("KCL: (Localiser) Ready to receive");
 
 		ros::spin();

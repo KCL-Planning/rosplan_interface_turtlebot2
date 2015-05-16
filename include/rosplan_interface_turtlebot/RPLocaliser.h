@@ -30,10 +30,15 @@ namespace KCL_rosplan {
 		ros::Publisher action_feedback_pub;
 		ros::Publisher cmd_vel_pub;
 
+		std::map<std::string, geometry_msgs::PoseStamped> waypoints;
+
+		void parsePose(geometry_msgs::PoseStamped &pose, std::string line);
+
 	public:
 
 		/* constructor */
 		RPLocaliser(ros::NodeHandle &nh);
+		bool setupRoadmap(std::string filename);
 
 		/* listen to and process action_dispatch topic */
 		void dispatchCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg);
