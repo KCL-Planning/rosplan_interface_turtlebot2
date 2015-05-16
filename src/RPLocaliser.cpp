@@ -67,6 +67,7 @@ namespace KCL_rosplan {
 				}
 			}
 
+			// std::cout << "OUTPUT: " << wpName << std::endl;
 			std_msgs::String statement;
 			if(""==wpName)
 				statement.data = "I am lost";
@@ -76,7 +77,8 @@ namespace KCL_rosplan {
 				statement.data = ss.str();
 			}
 			talker_pub.publish(statement);
-			std::cout << "OUTPUT: " << wpName << std::endl;
+			ros::Rate big_rate(0.5);
+			big_rate.sleep();
 
 			// predicate
 			rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
@@ -90,8 +92,6 @@ namespace KCL_rosplan {
 			update_knowledge_client.call(updatePredSrv);
 
 			ROS_INFO("KCL: (Localiser) action complete");
-
-			ros::Rate big_rate(0.5);
 			big_rate.sleep();
 
 			// publish feedback (achieved)
