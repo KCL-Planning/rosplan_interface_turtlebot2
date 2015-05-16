@@ -165,7 +165,7 @@ namespace KCL_rosplan {
 	int main(int argc, char **argv) {
 
 		ros::init(argc, argv, "rosplan_interface_localisation");
-		ros::NodeHandle nh;
+		ros::NodeHandle nh("~");
 
 		// params
 		std::string filename("waypoints.txt");
