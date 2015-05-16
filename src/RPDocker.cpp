@@ -53,6 +53,8 @@ namespace KCL_rosplan {
 				updatePredSrv.request.knowledge.values.push_back(pair);
 				update_knowledge_client.call(updatePredSrv);
 
+				ROS_INFO("KCL: (Localiser) action complete");
+
 				ros::Rate big_rate(0.5);
 				big_rate.sleep();
 
@@ -112,6 +114,8 @@ namespace KCL_rosplan {
 			pair.value = "kenny";
 			updatePredSrv.request.knowledge.values.push_back(pair);
 			update_knowledge_client.call(updatePredSrv);
+
+			ROS_INFO("KCL: (Localiser) action complete");
 
 			ros::Rate big_rate(0.5);
 			big_rate.sleep();

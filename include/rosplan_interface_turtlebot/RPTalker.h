@@ -2,38 +2,30 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
-#include <actionlib/client/simple_action_client.h>
 #include "rosplan_knowledge_msgs/KnowledgeItem.h"
 #include "rosplan_knowledge_msgs/KnowledgeUpdateService.h"
 #include "rosplan_dispatch_msgs/ActionDispatch.h"
 #include "rosplan_dispatch_msgs/ActionFeedback.h"
 #include "geometry_msgs/Twist.h"
-#include "kobuki_msgs/AutoDockingAction.h"
 
-#ifndef KCL_docker
-#define KCL_docker
+#ifndef KCL_talker
+#define KCL_talker
 
 /**
- * This file defines the RPDocker class.
- * RPDocker is used to call the kobuki_auto_docking control from PDDL.
- * PDDL "dock" and "undock" actions are listened for.
+ * This file defines the RPTalker class.
+ * RPTalker is used to send strings to espeak.
+ * It can state all action names as they are dispatched.
  */
 namespace KCL_rosplan {
 
-	class RPDocker
+	class RPTalker
 	{
 
 	private:
-
-		ros::ServiceClient update_knowledge_client;
-		ros::Publisher action_feedback_pub;
-		ros::Publisher cmd_vel_pub;
-		actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> action_client;
-
 	public:
 
 		/* constructor */
-		RPDocker(ros::NodeHandle &nh);
+		RPTalker(ros::NodeHandle &nh);
 
 		/* listen to and process action_dispatch topic */
 		void dispatchCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg);
