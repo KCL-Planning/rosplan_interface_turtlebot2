@@ -80,7 +80,7 @@ namespace KCL_rosplan {
 			ros::Rate big_rate(0.5);
 			big_rate.sleep();
 
-			// predicate
+			// predicate localised
 			rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
 			updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
 			updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::DOMAIN_ATTRIBUTE;
@@ -89,6 +89,14 @@ namespace KCL_rosplan {
 			pair.key = "v";
 			pair.value = "kenny";
 			updatePredSrv.request.knowledge.values.push_back(pair);
+			update_knowledge_client.call(updatePredSrv);
+
+			// predicate robot_at
+			updatePredSrv.request.knowledge.attribute_name = "robot_at";
+			diagnostic_msgs::KeyValue pairWP;
+			pairWP.key = "wp";
+			pairWP.value = wpName;
+			updatePredSrv.request.knowledge.values.push_back(pairWP);
 			update_knowledge_client.call(updatePredSrv);
 
 			ROS_INFO("KCL: (Localiser) action complete");
@@ -161,7 +169,7 @@ namespace KCL_rosplan {
 
 		// params
 		std::string filename("waypoints.txt");
-		nh.param("waypoint_file", filename, filename);
+		nh.param("/waypoint_file", filename, filename);
 
 		// create PDDL action subscriber
 		KCL_rosplan::RPLocaliser rplo(nh);
