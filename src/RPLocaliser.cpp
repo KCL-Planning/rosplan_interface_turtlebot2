@@ -27,7 +27,7 @@ namespace KCL_rosplan {
 			fb.action_id = msg->action_id;
 			fb.status = "action enabled";
 			action_feedback_pub.publish(fb);
-
+/*
 			geometry_msgs::Twist base_cmd;
 			base_cmd.linear.x = base_cmd.linear.y = base_cmd.angular.z = 0;
 			base_cmd.angular.x = base_cmd.angular.y = 0;
@@ -41,7 +41,35 @@ namespace KCL_rosplan {
 				rate.sleep();
 			}
 
-			// predicate
+			
+			geometry_msgs::PoseStamped pBase, pMap;
+			pBase.header.frame_id = "base_link";
+			pBase.pose.position.x = 0.0;
+			pBase.pose.position.y = 0.0;
+			pBase.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
+			ros::Time current_transform = ros::Time::now();
+			listener.getLatestCommonTime(pBase.header.frame_id, "map", current_transform, NULL);
+			pBase.header.stamp = current_transform;
+			listener.transformPose("map", pBase, pMap);
+			*/
+
+			// get pose of the robot
+			geometry_msgs::PoseStamped pBase, pMap;
+			pBase.header.frame_id = "/base_link";
+			pBase.pose.position.x = pBase.pose.position.y = pBase.pose.position.z = 0;
+			pBase.pose.orientation.x = pBase.pose.orientation.y = pBase.pose.orientation.w = 0;
+			pBase.pose.orientation.z = 1;
+
+			try {
+				tfl_.waitForTransform("/base_link", "/map", ros::Time::now(), ros::Duration(1.0));
+				tfl_.transformPose("/map", pBase, pMap);
+			} catch (tf::TransformException ex) {
+				ROS_ERROR("KCL: (Localiser) transforme error: %s", ex.what());
+			}
+
+			std::cout << "OUTPUT: " << pMap.pose.position.x << " " << pMap.pose.position.y << std::endl;
+
+/*			// predicate
 			rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
 			updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
 			updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::DOMAIN_ATTRIBUTE;
@@ -51,7 +79,7 @@ namespace KCL_rosplan {
 			pair.value = "kenny";
 			updatePredSrv.request.knowledge.values.push_back(pair);
 			update_knowledge_client.call(updatePredSrv);
-
+*/
 			ROS_INFO("KCL: (Localiser) action complete");
 
 			ros::Rate big_rate(0.5);

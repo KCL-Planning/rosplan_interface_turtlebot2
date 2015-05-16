@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   rosplan_knowledge_msgs
   actionlib
   kobuki_msgs
+  tf
 )
 
 ###################################
@@ -22,7 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Declare things to be passed to dependent projects
 catkin_package(
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp rospy std_msgs std_srvs diagnostic_msgs geometry_msgs rosplan_dispatch_msgs rosplan_knowledge_msgs actionlib kobuki_msgs
+  CATKIN_DEPENDS roscpp rospy std_msgs std_srvs diagnostic_msgs geometry_msgs rosplan_dispatch_msgs rosplan_knowledge_msgs actionlib kobuki_msgs tf
   DEPENDS
 )
 
