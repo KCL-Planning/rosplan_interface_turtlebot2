@@ -12,6 +12,7 @@ namespace KCL_rosplan {
 		// create publishers
 		action_feedback_pub = nh.advertise<rosplan_dispatch_msgs::ActionFeedback>("/kcl_rosplan/action_feedback", 10, true);
 		cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/navi", 10, true);
+		talker_pub = nh.advertise<std_msgs::String>("/kcl_rosplan/talker", 10, true);
 	}
 
 	/* action dispatch callback */
@@ -65,6 +66,16 @@ namespace KCL_rosplan {
 					d = sqrt(vX*vX + vY*vY);
 				}
 			}
+
+			std_msgs::String statement;
+			if(""==wpName)
+				statement.data = "I am lost";
+			else {
+				std::stringstream ss;
+				ss << "I am close to " << wpName << std::endl;
+				statement.data = ss.str();
+			}
+			talker_pub.publish(statement);
 			std::cout << "OUTPUT: " << wpName << std::endl;
 
 			// predicate

@@ -9,6 +9,7 @@
 #include "rosplan_dispatch_msgs/ActionFeedback.h"
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/PoseStamped.h"
+#include "std_msgs/String.h"
 
 #ifndef KCL_localiser
 #define KCL_localiser
@@ -29,6 +30,7 @@ namespace KCL_rosplan {
 		ros::ServiceClient update_knowledge_client;
 		ros::Publisher action_feedback_pub;
 		ros::Publisher cmd_vel_pub;
+		ros::Publisher talker_pub;
 
 		std::map<std::string, geometry_msgs::PoseStamped> waypoints;
 
