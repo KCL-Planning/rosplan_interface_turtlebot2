@@ -32,6 +32,14 @@ namespace KCL_rosplan {
 		runCommand(ss.str());
 	}
 
+		/* action dispatch callback */
+	void RPTalker::talkerCallback(const std_msgs::String::ConstPtr& msg) {
+		// read out load the action name
+		std::stringstream ss;
+		ss << "espeak -v en-sc -s 150 \"" << msg->data << "\"";
+		runCommand(ss.str());
+	}
+
 } // close namespace
 
 	/*-------------*/
@@ -48,6 +56,7 @@ namespace KCL_rosplan {
 	
 		// listen for action dispatch
 		ros::Subscriber ds = nh.subscribe("/kcl_rosplan/action_dispatch", 1000, &KCL_rosplan::RPTalker::dispatchCallback, &rpta);
+		ros::Subscriber ts = nh.subscribe("/kcl_rosplan/talker", 1000, &KCL_rosplan::RPTalker::talkerCallback, &rpta);
 		ROS_INFO("KCL: (Talker) Ready to receive");
 
 		ros::spin();

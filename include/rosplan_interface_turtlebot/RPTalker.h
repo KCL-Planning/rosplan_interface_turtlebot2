@@ -7,6 +7,7 @@
 #include "rosplan_dispatch_msgs/ActionDispatch.h"
 #include "rosplan_dispatch_msgs/ActionFeedback.h"
 #include "geometry_msgs/Twist.h"
+#include "std_msgs/String.h"
 
 #ifndef KCL_talker
 #define KCL_talker
@@ -32,6 +33,7 @@ namespace KCL_rosplan {
 
 		/* listen to and process action_dispatch topic */
 		void dispatchCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg);
+		void talkerCallback(const std_msgs::String::ConstPtr& msg);
 	};
 }
 #endif
