@@ -58,8 +58,8 @@ namespace KCL_rosplan {
 			double d = 10;
 			std::string wpName = "";
 			for (std::map<std::string,geometry_msgs::PoseStamped>::iterator wit=waypoints.begin(); wit!=waypoints.end(); ++wit) {
-				double vX = wit->second.pose.position.x - pBase.pose.position.x;
-				double vY = wit->second.pose.position.y - pBase.pose.position.y;
+				double vX = wit->second.pose.position.x - pMap.pose.position.x;
+				double vY = wit->second.pose.position.y - pMap.pose.position.y;
 				if(sqrt(vX*vX + vY*vY) < d) {
 					wpName = wit->first;
 					d = sqrt(vX*vX + vY*vY);
@@ -123,6 +123,7 @@ namespace KCL_rosplan {
 		int curr,next;
 		while(!infile.eof()) {
 			// read waypoint
+// std::cout << line << std::endl;
 			std::getline(infile, line);
 			curr=line.find("[");
 			std::string name = line.substr(0,curr);
