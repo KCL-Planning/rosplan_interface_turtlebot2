@@ -133,6 +133,7 @@ namespace KCL_rosplan {
 			parsePose(pose, line);
 			waypoints[name] = pose;
 		}
+		infile.close();
 	}
 
 } // close namespace
