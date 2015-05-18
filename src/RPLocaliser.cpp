@@ -9,6 +9,9 @@ namespace KCL_rosplan {
 		// knowledge interface
 		update_knowledge_client = nh.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>("/kcl_rosplan/update_knowledge_base");
 
+		// costmap client
+		clear_costmaps_client = nh.serviceClient<std_srvs::Empty>("/move_base/clear_costmaps");
+
 		// create publishers
 		action_feedback_pub = nh.advertise<rosplan_dispatch_msgs::ActionFeedback>("/kcl_rosplan/action_feedback", 10, true);
 		cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/navi", 10, true);
@@ -69,35 +72,45 @@ namespace KCL_rosplan {
 
 			// std::cout << "OUTPUT: " << wpName << std::endl;
 			std_msgs::String statement;
-			if(""==wpName)
+			if(""==wpName) {
 				statement.data = "I am lost";
-			else {
+			} else {
 				std::stringstream ss;
 				ss << "I am close to " << wpName << std::endl;
 				statement.data = ss.str();
+
+				std_srvs::Empty emptySrv;
+				clear_costmaps_client.call(emptySrv);
+
+				// predicate localised
+				rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
+				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
+				updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::DOMAIN_ATTRIBUTE;
+				updatePredSrv.request.knowledge.attribute_name = "localised";
+				diagnostic_msgs::KeyValue pair;
+				pair.key = "v";
+				pair.value = "kenny";
+				updatePredSrv.request.knowledge.values.push_back(pair);
+				update_knowledge_client.call(updatePredSrv);
+
+				// remove old robot_at
+				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
+				updatePredSrv.request.knowledge.attribute_name = "robot_at";
+				update_knowledge_client.call(updatePredSrv);
+
+				// predicate robot_at
+				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
+				updatePredSrv.request.knowledge.attribute_name = "robot_at";
+				diagnostic_msgs::KeyValue pairWP;
+				pairWP.key = "wp";
+				pairWP.value = wpName;
+				updatePredSrv.request.knowledge.values.push_back(pairWP);
+				update_knowledge_client.call(updatePredSrv);
+
 			}
 			talker_pub.publish(statement);
 			ros::Rate big_rate(0.5);
 			big_rate.sleep();
-
-			// predicate localised
-			rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
-			updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
-			updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::DOMAIN_ATTRIBUTE;
-			updatePredSrv.request.knowledge.attribute_name = "localised";
-			diagnostic_msgs::KeyValue pair;
-			pair.key = "v";
-			pair.value = "kenny";
-			updatePredSrv.request.knowledge.values.push_back(pair);
-			update_knowledge_client.call(updatePredSrv);
-
-			// predicate robot_at
-			updatePredSrv.request.knowledge.attribute_name = "robot_at";
-			diagnostic_msgs::KeyValue pairWP;
-			pairWP.key = "wp";
-			pairWP.value = wpName;
-			updatePredSrv.request.knowledge.values.push_back(pairWP);
-			update_knowledge_client.call(updatePredSrv);
 
 			ROS_INFO("KCL: (Localiser) action complete");
 			big_rate.sleep();

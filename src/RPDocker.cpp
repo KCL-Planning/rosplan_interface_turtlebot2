@@ -42,18 +42,21 @@ namespace KCL_rosplan {
 				actionlib::SimpleClientGoalState state = action_client.getState();
 				ROS_INFO("KCL: (Docker) action finished: %s", state.toString().c_str());
 
-				// predicate
+				// add predicate
 				rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
-				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
+				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
 				updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::DOMAIN_ATTRIBUTE;
-				updatePredSrv.request.knowledge.attribute_name = "undocked";
+				updatePredSrv.request.knowledge.attribute_name = "docked";
 				diagnostic_msgs::KeyValue pair;
 				pair.key = "v";
 				pair.value = "kenny";
 				updatePredSrv.request.knowledge.values.push_back(pair);
 				update_knowledge_client.call(updatePredSrv);
 
-				ROS_INFO("KCL: (Localiser) action complete");
+				// remove predicate
+				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
+				updatePredSrv.request.knowledge.attribute_name = "undocked";
+				update_knowledge_client.call(updatePredSrv);
 
 				ros::Rate big_rate(0.5);
 				big_rate.sleep();
