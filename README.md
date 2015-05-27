@@ -46,6 +46,6 @@ KCL: (Localiser) action received
 
 ***
 
-You can also observe that AMCL particle cloud gets tightened after localisation, because robot gets a better pose estimation after this action. 
+You can also observe that AMCL particle cloud gets tightened after localisation, because robot gets a better pose estimation after this action. For more information about ROS Navigation, please visit: http://wiki.ros.org/navigation
 
 ![wuegweh](http://cdn.makeagif.com/media/5-26-2015/iOlcPH.gif)
