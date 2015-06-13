@@ -97,7 +97,6 @@ namespace KCL_rosplan {
 			geometry_msgs::Twist base_cmd;
 			base_cmd.linear.y = base_cmd.angular.z = 0;   
 			base_cmd.linear.x = -0.25;
-
 			int count = 0;
 			ros::Rate rate(10.0);
 			while (ros::ok() && count < 10) { 
@@ -124,7 +123,8 @@ namespace KCL_rosplan {
 			updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
 			updatePredSrv.request.knowledge.attribute_name = "docked";
 			update_knowledge_client.call(updatePredSrv);
-
+			
+			ros::spinOnce();
 			ros::Rate big_rate(0.5);
 			big_rate.sleep();
 
