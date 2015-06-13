@@ -107,7 +107,9 @@ namespace KCL_rosplan {
 				count++;
 			}
 
-			// predicate
+			ROS_INFO("KCL: (Localiser) action complete");
+
+			// add predicate
 			rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
 			updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
 			updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::DOMAIN_ATTRIBUTE;
@@ -118,7 +120,10 @@ namespace KCL_rosplan {
 			updatePredSrv.request.knowledge.values.push_back(pair);
 			update_knowledge_client.call(updatePredSrv);
 
-			ROS_INFO("KCL: (Localiser) action complete");
+			// remove predicate
+			updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
+			updatePredSrv.request.knowledge.attribute_name = "docked";
+			update_knowledge_client.call(updatePredSrv);
 
 			ros::Rate big_rate(0.5);
 			big_rate.sleep();
@@ -126,7 +131,6 @@ namespace KCL_rosplan {
 			// publish feedback (achieved)
 			fb.status = "action achieved";
 			action_feedback_pub.publish(fb);
-
 		}
 	}
 } // close namespace
