@@ -85,7 +85,7 @@ namespace KCL_rosplan {
 				// predicate localised
 				rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
 				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
-				updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::DOMAIN_ATTRIBUTE;
+				updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
 				updatePredSrv.request.knowledge.attribute_name = "localised";
 				diagnostic_msgs::KeyValue pair;
 				pair.key = "v";

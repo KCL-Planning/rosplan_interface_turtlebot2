@@ -45,7 +45,7 @@ namespace KCL_rosplan {
 				// add predicate
 				rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
 				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
-				updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::DOMAIN_ATTRIBUTE;
+				updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
 				updatePredSrv.request.knowledge.attribute_name = "docked";
 				diagnostic_msgs::KeyValue pair;
 				pair.key = "v";
@@ -111,7 +111,7 @@ namespace KCL_rosplan {
 			// add predicate
 			rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
 			updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
-			updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::DOMAIN_ATTRIBUTE;
+			updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
 			updatePredSrv.request.knowledge.attribute_name = "undocked";
 			diagnostic_msgs::KeyValue pair;
 			pair.key = "v";

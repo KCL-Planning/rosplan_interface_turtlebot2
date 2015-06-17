@@ -39,8 +39,13 @@ include_directories(
 
 ## Declare cpp executables
 add_executable(rpdocker src/RPDocker.cpp)
+add_dependencies(rpdocker ${catkin_EXPORTED_TARGETS})
+
 add_executable(rplocaliser src/RPLocaliser.cpp)
+add_dependencies(rplocaliser ${catkin_EXPORTED_TARGETS})
+
 add_executable(rptalker src/RPTalker.cpp)
+add_dependencies(rptalker ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries against which to link a library or executable target
 target_link_libraries(rpdocker ${catkin_LIBRARIES} ${Boost_LIBRARIES})
