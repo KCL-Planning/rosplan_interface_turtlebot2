@@ -108,11 +108,10 @@ namespace KCL_rosplan {
 
 			geometry_msgs::Twist base_cmd;
 			base_cmd.linear.y = base_cmd.angular.z = 0;   
-			base_cmd.linear.x = 0;
+			base_cmd.linear.x = -0.15;
 			int count = 0;
 			ros::Rate rate(10.0);
 			while (ros::ok() && count < 20) {
-				base_cmd.linear.x = -(1+cos((count/10+1)*3.141))*0.25;
 				ros::spinOnce();
 				cmd_vel_pub.publish(base_cmd);
 				rate.sleep();
