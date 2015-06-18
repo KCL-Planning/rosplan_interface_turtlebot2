@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <actionlib/client/simple_action_client.h>
+#include <math.h>
 #include "rosplan_knowledge_msgs/KnowledgeItem.h"
 #include "rosplan_knowledge_msgs/KnowledgeUpdateService.h"
 #include "rosplan_dispatch_msgs/ActionDispatch.h"

@@ -42,30 +42,42 @@ namespace KCL_rosplan {
 				actionlib::SimpleClientGoalState state = action_client.getState();
 				ROS_INFO("KCL: (Docker) action finished: %s", state.toString().c_str());
 
-				// add predicate
-				rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
-				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
-				updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
-				updatePredSrv.request.knowledge.attribute_name = "docked";
-				diagnostic_msgs::KeyValue pair;
-				pair.key = "v";
-				pair.value = "kenny";
-				updatePredSrv.request.knowledge.values.push_back(pair);
-				update_knowledge_client.call(updatePredSrv);
+				if(state == actionlib::SimpleClientGoalState::SUCCEEDED) {
 
-				// remove predicate
-				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
-				updatePredSrv.request.knowledge.attribute_name = "undocked";
-				update_knowledge_client.call(updatePredSrv);
+					// add predicate
+					rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
+					updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
+					updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
+					updatePredSrv.request.knowledge.attribute_name = "docked";
+					diagnostic_msgs::KeyValue pair;
+					pair.key = "v";
+					pair.value = "kenny";
+					updatePredSrv.request.knowledge.values.push_back(pair);
+					update_knowledge_client.call(updatePredSrv);
 
-				ros::Rate big_rate(0.5);
-				big_rate.sleep();
+					// remove predicate
+					updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
+					updatePredSrv.request.knowledge.attribute_name = "undocked";
+					update_knowledge_client.call(updatePredSrv);
 
-				// publish feedback (achieved)
-				 rosplan_dispatch_msgs::ActionFeedback fb;
-				fb.action_id = msg->action_id;
-				fb.status = "action achieved";
-				action_feedback_pub.publish(fb);
+					ros::Rate big_rate(0.5);
+					big_rate.sleep();
+
+					// publish feedback (achieved)
+					 rosplan_dispatch_msgs::ActionFeedback fb;
+					fb.action_id = msg->action_id;
+					fb.status = "action achieved";
+					action_feedback_pub.publish(fb);
+
+				} else {
+
+					// publish feedback (failed)
+					rosplan_dispatch_msgs::ActionFeedback fb;
+					fb.action_id = msg->action_id;
+					fb.status = "action failed";
+					action_feedback_pub.publish(fb);
+
+				}
 
 			} else {
 
@@ -96,10 +108,11 @@ namespace KCL_rosplan {
 
 			geometry_msgs::Twist base_cmd;
 			base_cmd.linear.y = base_cmd.angular.z = 0;   
-			base_cmd.linear.x = -0.25;
+			base_cmd.linear.x = 0;
 			int count = 0;
 			ros::Rate rate(10.0);
-			while (ros::ok() && count < 10) { 
+			while (ros::ok() && count < 20) {
+				base_cmd.linear.x = -(1+cos((count/10+1)*3.141))*0.25;
 				ros::spinOnce();
 				cmd_vel_pub.publish(base_cmd);
 				rate.sleep();
