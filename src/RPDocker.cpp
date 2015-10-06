@@ -4,7 +4,8 @@
 namespace KCL_rosplan {
 
 	/* constructor */
-	RPDocker::RPDocker(ros::NodeHandle &nh) : action_client("/dock_drive_action", true){
+	RPDocker::RPDocker(ros::NodeHandle &nh, std::string turtlebot_name)
+		: action_client("/dock_drive_action", true), name(turtlebot_name) {
 
 		// create the action client
 		ROS_INFO("KCL: (Docker) waiting for action server to start on /dock_drive_action");
@@ -24,7 +25,19 @@ namespace KCL_rosplan {
 		// dock the kobuki
 		if(0==msg->name.compare("dock")) {
 
-			ROS_INFO("KCL: (Docker) action recieved");
+			ROS_INFO("KCL: (Docker) action received");
+
+			// Check robot name
+			bool right_robot = false;
+			for(size_t i=0; i<msg->parameters.size(); i++) {
+				if(0==msg->parameters[i].key.compare("v") && 0==msg->parameters[i].value.compare(name)) {
+					right_robot = true;
+				}
+			}
+			if(!right_robot) {
+				ROS_DEBUG("KCL: (Docker) aborting action dispatch; handling robot %s", name.c_str());
+				return;
+			}
 
 			// dispatch auto dock action
 			kobuki_msgs::AutoDockingGoal goal;
@@ -51,7 +64,7 @@ namespace KCL_rosplan {
 					updatePredSrv.request.knowledge.attribute_name = "docked";
 					diagnostic_msgs::KeyValue pair;
 					pair.key = "v";
-					pair.value = "kenny";
+					pair.value = name;
 					updatePredSrv.request.knowledge.values.push_back(pair);
 					update_knowledge_client.call(updatePredSrv);
 
@@ -107,7 +120,7 @@ namespace KCL_rosplan {
 			action_feedback_pub.publish(fb);
 
 			geometry_msgs::Twist base_cmd;
-			base_cmd.linear.y = base_cmd.angular.z = 0;   
+			base_cmd.linear.y = base_cmd.angular.z = 0;
 			base_cmd.linear.x = -0.15;
 			int count = 0;
 			ros::Rate rate(10.0);
@@ -127,7 +140,7 @@ namespace KCL_rosplan {
 			updatePredSrv.request.knowledge.attribute_name = "undocked";
 			diagnostic_msgs::KeyValue pair;
 			pair.key = "v";
-			pair.value = "kenny";
+			pair.value = name;
 			updatePredSrv.request.knowledge.values.push_back(pair);
 			update_knowledge_client.call(updatePredSrv);
 
@@ -135,7 +148,7 @@ namespace KCL_rosplan {
 			updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
 			updatePredSrv.request.knowledge.attribute_name = "docked";
 			update_knowledge_client.call(updatePredSrv);
-			
+
 			ros::spinOnce();
 			ros::Rate big_rate(0.5);
 			big_rate.sleep();
@@ -154,11 +167,14 @@ namespace KCL_rosplan {
 	int main(int argc, char **argv) {
 
 		ros::init(argc, argv, "rosplan_interface_docker");
-		ros::NodeHandle nh;
+		ros::NodeHandle nh("~");
+
+		std::string turtlebot_name;
+		nh.param("turtlebot_name", turtlebot_name, std::string("kenny"));
 
 		// create PDDL action subscriber
-		KCL_rosplan::RPDocker rpdo(nh);
-	
+		KCL_rosplan::RPDocker rpdo(nh, turtlebot_name);
+
 		// listen for action dispatch
 		ros::Subscriber ds = nh.subscribe("/kcl_rosplan/action_dispatch", 1000, &KCL_rosplan::RPDocker::dispatchCallback, &rpdo);
 		ROS_INFO("KCL: (Docker) Ready to receive");

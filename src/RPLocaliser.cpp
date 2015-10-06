@@ -4,7 +4,8 @@
 namespace KCL_rosplan {
 
 	/* constructor */
-	RPLocaliser::RPLocaliser(ros::NodeHandle &nh) {
+	RPLocaliser::RPLocaliser(ros::NodeHandle &nh, std::string turtlebot_name, std::string tf_prefix)
+    : name(turtlebot_name), prefix(tf_prefix) {
 
 		// knowledge interface
 		update_knowledge_client = nh.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>("/kcl_rosplan/update_knowledge_base");
@@ -24,7 +25,19 @@ namespace KCL_rosplan {
 		// dock the kobuki
 		if(0==msg->name.compare("localise")) {
 
-			ROS_INFO("KCL: (Localiser) action recieved");
+			ROS_INFO("KCL: (Localiser) action received");
+
+			// Check robot name
+			bool right_robot = false;
+			for(size_t i=0; i<msg->parameters.size(); i++) {
+				if(0==msg->parameters[i].key.compare("v") && 0==msg->parameters[i].value.compare(name)) {
+					right_robot = true;
+				}
+			}
+			if(!right_robot) {
+				ROS_DEBUG("KCL: (Localiser) aborting action dispatch; handling robot %s", name.c_str());
+				return;
+			}
 
 			// publish feedback (enabled)
 			rosplan_dispatch_msgs::ActionFeedback fb;
@@ -39,7 +52,7 @@ namespace KCL_rosplan {
 
 			double start = ros::WallTime::now().toSec();
 			ros::Rate rate(10.0);
-			while (ros::ok() && (ros::WallTime::now().toSec() - start < 60)){ 
+			while (ros::ok() && (ros::WallTime::now().toSec() - start < 60)){
 				ros::spinOnce();
 				cmd_vel_pub.publish(base_cmd);
 				rate.sleep();
@@ -47,14 +60,14 @@ namespace KCL_rosplan {
 
 			// get pose of the robot
 			geometry_msgs::PoseStamped pBase, pMap;
-			pBase.header.frame_id = "/base_link";
+			pBase.header.frame_id = tf::resolve(prefix, "base_link");
 			pBase.pose.position.x = pBase.pose.position.y = pBase.pose.position.z = 0;
 			pBase.pose.orientation.x = pBase.pose.orientation.y = pBase.pose.orientation.w = 0;
 			pBase.pose.orientation.z = 1;
 
 			try {
-				tfl_.waitForTransform("/base_link", "/map", ros::Time::now(), ros::Duration(1.0));
-				tfl_.transformPose("/map", pBase, pMap);
+				tfl_.waitForTransform(tf::resolve(prefix, "base_link"), "map", ros::Time::now(), ros::Duration(1.0));
+				tfl_.transformPose("map", pBase, pMap);
 			} catch (tf::TransformException ex) {
 				ROS_ERROR("KCL: (Localiser) transforme error: %s", ex.what());
 			}
@@ -89,7 +102,7 @@ namespace KCL_rosplan {
 				updatePredSrv.request.knowledge.attribute_name = "localised";
 				diagnostic_msgs::KeyValue pair;
 				pair.key = "v";
-				pair.value = "kenny";
+				pair.value = name;
 				updatePredSrv.request.knowledge.values.push_back(pair);
 				update_knowledge_client.call(updatePredSrv);
 
@@ -147,7 +160,7 @@ namespace KCL_rosplan {
 		ros::NodeHandle nh("~");
 
 		// clear previous roadmap from knowledge base
-		ROS_INFO("KCL: (RPLocaliser) Loading roadmap from file");
+		ROS_INFO("KCL: (RPLocaliser) Loading roadmap from file %s", filename.c_str());
 
 		// load configuration file
 		std::ifstream infile(filename.c_str());
@@ -179,15 +192,20 @@ namespace KCL_rosplan {
 
 		ros::init(argc, argv, "rosplan_interface_localisation");
 		ros::NodeHandle nh("~");
+		ros::NodeHandle nh2;
 
 		// params
-		std::string filename("waypoints.txt");
-		nh.param("/waypoint_file", filename, filename);
+		std::string filename;
+		std::string turtlebot_name;
+		std::string tf_prefix;
+		nh.param("/waypoint_file", filename, std::string("waypoints.txt"));
+		nh.param("turtlebot_name", turtlebot_name, std::string("kenny"));
+		nh2.getParam("tf_prefix", tf_prefix);
 
 		// create PDDL action subscriber
-		KCL_rosplan::RPLocaliser rplo(nh);
+		KCL_rosplan::RPLocaliser rplo(nh, turtlebot_name, tf_prefix);
 		rplo.setupRoadmap(filename);
-	
+
 		// listen for action dispatch
 		ros::Subscriber ds = nh.subscribe("/kcl_rosplan/action_dispatch", 1000, &KCL_rosplan::RPLocaliser::dispatchCallback, &rplo);
 		ROS_INFO("KCL: (Localiser) Ready to receive");

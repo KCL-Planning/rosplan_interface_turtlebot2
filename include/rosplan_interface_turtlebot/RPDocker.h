@@ -30,11 +30,12 @@ namespace KCL_rosplan {
 		ros::Publisher action_feedback_pub;
 		ros::Publisher cmd_vel_pub;
 		actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> action_client;
+		std::string name;
 
 	public:
 
 		/* constructor */
-		RPDocker(ros::NodeHandle &nh);
+		RPDocker(ros::NodeHandle &nh, std::string turtlebot_name);
 
 		/* listen to and process action_dispatch topic */
 		void dispatchCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr& msg);

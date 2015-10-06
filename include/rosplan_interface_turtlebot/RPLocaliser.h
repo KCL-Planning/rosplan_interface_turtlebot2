@@ -27,7 +27,7 @@ namespace KCL_rosplan {
 
 	private:
 
-  		tf::TransformListener tfl_;
+		tf::TransformListener tfl_;
 		ros::ServiceClient update_knowledge_client;
 		ros::ServiceClient clear_costmaps_client;
 		ros::Publisher action_feedback_pub;
@@ -35,13 +35,15 @@ namespace KCL_rosplan {
 		ros::Publisher talker_pub;
 
 		std::map<std::string, geometry_msgs::PoseStamped> waypoints;
+		std::string name;
+		std::string prefix;
 
 		void parsePose(geometry_msgs::PoseStamped &pose, std::string line);
 
 	public:
 
 		/* constructor */
-		RPLocaliser(ros::NodeHandle &nh);
+		RPLocaliser(ros::NodeHandle &nh, std::string turtlebot_name, std::string tf_prefix);
 		bool setupRoadmap(std::string filename);
 
 		/* listen to and process action_dispatch topic */
