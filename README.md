@@ -17,7 +17,7 @@ This parameter file needs to be included in `interfaced_planning_system.launch` 
 Make sure that this package node is included in the same launch file: 
  
 ```sh
-<node name="rosplan_interface_localise" pkg="rosplan_interface_turtlebot" type="rplocaliser" respawn="false" output="screen"> 
+<node name="rosplan_interface_localise" pkg="rosplan_interface_turtlebot2" type="rplocaliser" respawn="false" output="screen"> 
 </node> 
 ```
  

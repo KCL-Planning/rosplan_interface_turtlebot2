@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rosplan_interface_turtlebot)
+project(rosplan_interface_turtlebot2)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS

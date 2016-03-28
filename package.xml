@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>rosplan_interface_turtlebot</name>
+  <name>rosplan_interface_turtlebot2</name>
   <version>0.0.0</version>
   <description>ROSPlan dispatch interface for the turtlebot. Adapts PDDL actions to miscellaneous control on the (Kobuki) turtlebot.</description>
   <maintainer email="michael.cashmore@kcl.ac.uk">michael</maintainer>
