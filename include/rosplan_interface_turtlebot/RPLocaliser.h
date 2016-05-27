@@ -30,6 +30,7 @@ namespace KCL_rosplan {
 		tf::TransformListener tfl_;
 		ros::ServiceClient update_knowledge_client;
 		ros::ServiceClient clear_costmaps_client;
+		ros::ServiceClient global_localization_client;
 		ros::Publisher action_feedback_pub;
 		ros::Publisher cmd_vel_pub;
 		ros::Publisher talker_pub;

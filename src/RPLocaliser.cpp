@@ -12,6 +12,7 @@ namespace KCL_rosplan {
 
 		// costmap client
 		clear_costmaps_client = nh.serviceClient<std_srvs::Empty>("/move_base/clear_costmaps");
+		global_localization_client = nh.serviceClient<std_srvs::Empty>("/global_localization");
 
 		// create publishers
 		action_feedback_pub = nh.advertise<rosplan_dispatch_msgs::ActionFeedback>("/kcl_rosplan/action_feedback", 10, true);
@@ -38,6 +39,10 @@ namespace KCL_rosplan {
 				ROS_DEBUG("KCL: (Localiser) aborting action dispatch; handling robot %s", name.c_str());
 				return;
 			}
+
+			// reset AMCL particles
+			std_srvs::Empty emptySrv;
+			global_localization_client.call(emptySrv);
 
 			// publish feedback (enabled)
 			rosplan_dispatch_msgs::ActionFeedback fb;
