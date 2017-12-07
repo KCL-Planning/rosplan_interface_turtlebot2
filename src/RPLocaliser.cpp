@@ -203,7 +203,7 @@ namespace KCL_rosplan {
 		std::string filename;
 		std::string turtlebot_name;
 		std::string tf_prefix;
-		nh.param("/waypoint_file", filename, std::string("waypoints.txt"));
+		nh.param("waypoint_file", filename, std::string("waypoints.txt"));
 		nh.param("turtlebot_name", turtlebot_name, std::string("kenny"));
 		nh2.getParam("tf_prefix", tf_prefix);
 
