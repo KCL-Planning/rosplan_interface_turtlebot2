@@ -55,7 +55,9 @@ namespace KCL_rosplan {
 		KCL_rosplan::RPTalker rpta(nh);
 	
 		// listen for action dispatch
-		ros::Subscriber ds = nh.subscribe("/kcl_rosplan/action_dispatch", 1000, &KCL_rosplan::RPTalker::dispatchCallback, &rpta);
+		std::string adt = "default_dispatch_topic";
+		nh.getParam("action_dispatch_topic", adt);
+		ros::Subscriber ds = nh.subscribe(adt, 1000, &KCL_rosplan::RPTalker::dispatchCallback, &rpta);
 		ros::Subscriber ts = nh.subscribe("/kcl_rosplan/talker", 1000, &KCL_rosplan::RPTalker::talkerCallback, &rpta);
 		ROS_INFO("KCL: (Talker) Ready to receive");
 

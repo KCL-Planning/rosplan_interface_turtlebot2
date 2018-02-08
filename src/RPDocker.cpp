@@ -15,7 +15,9 @@ namespace KCL_rosplan {
 		update_knowledge_client = nh.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>("/kcl_rosplan/update_knowledge_base");
 
 		// create publishers
-		action_feedback_pub = nh.advertise<rosplan_dispatch_msgs::ActionFeedback>("/kcl_rosplan/action_feedback", 10, true);
+		std::string aft = "default_feedback_topic";
+		nh.getParam("action_feedback_topic", aft);
+		action_feedback_pub = nh.advertise<rosplan_dispatch_msgs::ActionFeedback>(aft, 10, true);
 		cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("/mobile_base/commands/velocity", 10, true);
 	}
 
@@ -176,7 +178,10 @@ namespace KCL_rosplan {
 		KCL_rosplan::RPDocker rpdo(nh, turtlebot_name);
 
 		// listen for action dispatch
-		ros::Subscriber ds = nh.subscribe("/kcl_rosplan/action_dispatch", 1000, &KCL_rosplan::RPDocker::dispatchCallback, &rpdo);
+		std::string adt = "default_dispatch_topic";
+		nh.getParam("action_dispatch_topic", adt);
+		ros::Subscriber ds = nh.subscribe(adt, 1000, &KCL_rosplan::RPDocker::dispatchCallback, &rpdo);
+
 		ROS_INFO("KCL: (Docker) Ready to receive");
 
 		ros::spin();

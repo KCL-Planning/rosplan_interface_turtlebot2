@@ -15,7 +15,9 @@ namespace KCL_rosplan {
 		global_localization_client = nh.serviceClient<std_srvs::Empty>("/global_localization");
 
 		// create publishers
-		action_feedback_pub = nh.advertise<rosplan_dispatch_msgs::ActionFeedback>("/kcl_rosplan/action_feedback", 10, true);
+		std::string aft = "default_feedback_topic";
+		nh.getParam("action_feedback_topic", aft);
+		action_feedback_pub = nh.advertise<rosplan_dispatch_msgs::ActionFeedback>(aft, 10, true);
 		cmd_vel_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/navi", 10, true);
 		talker_pub = nh.advertise<std_msgs::String>("/kcl_rosplan/talker", 10, true);
 	}
@@ -212,7 +214,9 @@ namespace KCL_rosplan {
 		rplo.setupRoadmap(filename);
 
 		// listen for action dispatch
-		ros::Subscriber ds = nh.subscribe("/kcl_rosplan/action_dispatch", 1000, &KCL_rosplan::RPLocaliser::dispatchCallback, &rplo);
+		std::string adt = "default_dispatch_topic";
+		nh.getParam("action_dispatch_topic", adt);
+		ros::Subscriber ds = nh.subscribe(adt, 1000, &KCL_rosplan::RPLocaliser::dispatchCallback, &rplo);
 		ROS_INFO("KCL: (Localiser) Ready to receive");
 
 		ros::spin();
