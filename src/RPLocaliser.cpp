@@ -114,8 +114,9 @@ namespace KCL_rosplan {
 				update_knowledge_client.call(updatePredSrv);
 
 				// remove old robot_at
-				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
                 updatePredSrv = rosplan_knowledge_msgs::KnowledgeUpdateService();
+                updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
+                updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
 				updatePredSrv.request.knowledge.attribute_name = "robot_at";
                 pair.key = "v";
                 pair.value = name;
@@ -126,8 +127,9 @@ namespace KCL_rosplan {
 				update_knowledge_client.call(updatePredSrv);
 
 				// predicate robot_at
-				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
                 updatePredSrv = rosplan_knowledge_msgs::KnowledgeUpdateService();
+                updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
+                updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
 				updatePredSrv.request.knowledge.attribute_name = "robot_at";
                 pair.key = "v";
                 pair.value = name;
@@ -138,6 +140,7 @@ namespace KCL_rosplan {
 				update_knowledge_client.call(updatePredSrv);
 
 			}
+			ROS_INFO("(Localiser) %s", statement.data.c_str());
 			talker_pub.publish(statement);
 			ros::Rate big_rate(0.5);
 			big_rate.sleep();
