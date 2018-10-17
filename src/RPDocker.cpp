@@ -32,12 +32,12 @@ namespace KCL_rosplan {
 			// Check robot name
 			bool right_robot = false;
 			for(size_t i=0; i<msg->parameters.size(); i++) {
-				if(0==msg->parameters[i].key.compare("v") && 0==msg->parameters[i].value.compare(name)) {
+				if(0==msg->parameters[i].value.compare(name)) {
 					right_robot = true;
 				}
 			}
 			if(!right_robot) {
-				ROS_DEBUG("KCL: (Docker) aborting action dispatch; handling robot %s", name.c_str());
+				ROS_WARN("KCL: (Docker) aborting action dispatch; handling robot %s", name.c_str());
 				return;
 			}
 
@@ -51,7 +51,7 @@ namespace KCL_rosplan {
 			fb.status = "action enabled";
 			action_feedback_pub.publish(fb);
 
-			bool finished_before_timeout = action_client.waitForResult(ros::Duration(5*msg->duration));
+			bool finished_before_timeout = action_client.waitForResult(ros::Duration(/*5*msg->duration*/50));
 			if (finished_before_timeout) {
 
 				actionlib::SimpleClientGoalState state = action_client.getState();
