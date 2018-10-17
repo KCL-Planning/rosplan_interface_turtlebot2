@@ -115,7 +115,11 @@ namespace KCL_rosplan {
 
 				// remove old robot_at
 				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
+                updatePredSrv = rosplan_knowledge_msgs::KnowledgeUpdateService();
 				updatePredSrv.request.knowledge.attribute_name = "robot_at";
+                pair.key = "v";
+                pair.value = name;
+                updatePredSrv.request.knowledge.values.push_back(pair);
 				pair.key = "w";
 				pair.value = "";
 				updatePredSrv.request.knowledge.values.push_back(pair);
@@ -123,11 +127,14 @@ namespace KCL_rosplan {
 
 				// predicate robot_at
 				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
+                updatePredSrv = rosplan_knowledge_msgs::KnowledgeUpdateService();
 				updatePredSrv.request.knowledge.attribute_name = "robot_at";
-				diagnostic_msgs::KeyValue pairWP;
-				pairWP.key = "wp";
-				pairWP.value = wpName;
-				updatePredSrv.request.knowledge.values.push_back(pairWP);
+                pair.key = "v";
+                pair.value = name;
+                updatePredSrv.request.knowledge.values.push_back(pair);
+                pair.key = "wp";
+                pair.value = wpName;
+				updatePredSrv.request.knowledge.values.push_back(pair);
 				update_knowledge_client.call(updatePredSrv);
 
 			}
