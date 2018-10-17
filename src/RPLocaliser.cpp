@@ -33,7 +33,7 @@ namespace KCL_rosplan {
 			// Check robot name
 			bool right_robot = false;
 			for(size_t i=0; i<msg->parameters.size(); i++) {
-				if(0==msg->parameters[i].key.compare("v") && 0==msg->parameters[i].value.compare(name)) {
+				if((0==msg->parameters[i].key.compare("v") or 0==msg->parameters[i].key.compare("r")) && 0==msg->parameters[i].value.compare(name)) {
 					right_robot = true;
 				}
 			}
@@ -116,6 +116,9 @@ namespace KCL_rosplan {
 				// remove old robot_at
 				updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_KNOWLEDGE;
 				updatePredSrv.request.knowledge.attribute_name = "robot_at";
+				pair.key = "w";
+				pair.value = "";
+				updatePredSrv.request.knowledge.values.push_back(pair);
 				update_knowledge_client.call(updatePredSrv);
 
 				// predicate robot_at
@@ -197,7 +200,7 @@ namespace KCL_rosplan {
 
 	int main(int argc, char **argv) {
 
-		ros::init(argc, argv, "rosplan_interface_localisation");
+		ros::init(argc, argv, "rosplan_localiser_interface");
 		ros::NodeHandle nh("~");
 		ros::NodeHandle nh2;
 

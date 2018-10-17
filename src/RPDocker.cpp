@@ -27,7 +27,7 @@ namespace KCL_rosplan {
 		// dock the kobuki
 		if(0==msg->name.compare("dock")) {
 
-			ROS_INFO("KCL: (Docker) action received");
+			ROS_INFO("KCL: (Docker) action received - dock");
 
 			// Check robot name
 			bool right_robot = false;
@@ -55,7 +55,7 @@ namespace KCL_rosplan {
 			if (finished_before_timeout) {
 
 				actionlib::SimpleClientGoalState state = action_client.getState();
-				ROS_INFO("KCL: (Docker) action finished: %s", state.toString().c_str());
+				ROS_INFO("KCL: (Docker) action finished: %s - dock", state.toString().c_str());
 
 				if(state == actionlib::SimpleClientGoalState::SUCCEEDED) {
 
@@ -113,7 +113,7 @@ namespace KCL_rosplan {
 		// undock the kobuki
 		else if(0==msg->name.compare("undock")) {
 
-			ROS_INFO("KCL: (Docker) action recieved");
+			ROS_INFO("KCL: (Docker) action recieved - undock");
 
 			// publish feedback (enabled)
 			rosplan_dispatch_msgs::ActionFeedback fb;
@@ -133,7 +133,7 @@ namespace KCL_rosplan {
 				count++;
 			}
 
-			ROS_INFO("KCL: (Localiser) action complete");
+			ROS_INFO("KCL: (Docker) action complete - undock");
 
 			// add predicate
 			rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
