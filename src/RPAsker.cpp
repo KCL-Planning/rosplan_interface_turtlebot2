@@ -20,6 +20,9 @@ namespace  KCL_rosplan {
         nh.getParam("action_feedback_topic", aft);
         action_feedback_pub = nh.advertise<rosplan_dispatch_msgs::ActionFeedback>(aft, 10, true);
         tts_pub = nh.advertise<std_msgs::String>("/speech", 1, true);
+
+        // knowledge interface
+        update_knowledge_client = nh.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateService>("/kcl_rosplan/update_knowledge_base");
     }
 
     void RPAsker::speak(const std::string &s) {
@@ -29,15 +32,17 @@ namespace  KCL_rosplan {
     }
 
     void RPAsker::dispatchCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr &msg) {
-        std::string to_say;
+        std::string to_say, predicate;
         bool correct_action = false;
 
         if (msg->name == "ask_load") {
             correct_action  = true;
+            predicate = "asked_load";
             to_say = "Please, would you be kind enough to fetch the printed papers and put them on top of me?";
         }
         else if (msg->name == "ask_unload") {
             correct_action = true;
+            predicate = "asked_unload";
             to_say = "Your printings are ready! Can you get the papers from me?";
         }
 
@@ -52,6 +57,17 @@ namespace  KCL_rosplan {
 
             speak(to_say);
             ros::Duration(0.075*to_say.length()).sleep(); // Duration proportional to the said speech
+
+            // add predicate
+            rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
+            updatePredSrv.request.update_type = rosplan_knowledge_msgs::KnowledgeUpdateService::Request::ADD_KNOWLEDGE;
+            updatePredSrv.request.knowledge.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;
+            updatePredSrv.request.knowledge.attribute_name = predicate;
+            diagnostic_msgs::KeyValue pair;
+            pair.key = "r";
+            pair.value = robot_name;
+            updatePredSrv.request.knowledge.values.push_back(pair);
+            update_knowledge_client.call(updatePredSrv);
 
             // publish feedback (achieved)
             fb.action_id = msg->action_id;

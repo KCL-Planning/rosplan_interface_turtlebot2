@@ -20,6 +20,7 @@ namespace KCL_rosplan {
         ros::Publisher tts_pub;
         ros::Subscriber dispatcher;
 		ros::Publisher action_feedback_pub;
+        ros::ServiceClient update_knowledge_client;
 
 
         void speak(const std::string &s);
