@@ -47,7 +47,11 @@ add_dependencies(rplocaliser ${catkin_EXPORTED_TARGETS})
 add_executable(rptalker src/RPTalker.cpp)
 add_dependencies(rptalker ${catkin_EXPORTED_TARGETS})
 
+add_executable(rpasker src/RPAsker.cpp)
+add_dependencies(rpasker ${catkin_EXPORTED_TARGETS})
+
 ## Specify libraries against which to link a library or executable target
 target_link_libraries(rpdocker ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(rplocaliser ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 target_link_libraries(rptalker ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(rpasker ${catkin_LIBRARIES} ${Boost_LIBRARIES})
