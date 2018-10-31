@@ -47,6 +47,7 @@ namespace  KCL_rosplan {
         }
 
         if (correct_action) {
+            ROS_INFO("(Asker) Received action %s", msg->name.c_str());
             if (msg->parameters[0].value != robot_name) return;
 
             // publish feedback (enabled)
@@ -84,8 +85,8 @@ namespace  KCL_rosplan {
 
 int main(int argc, char **argv) {
 
-    ros::init(argc, argv, "rosplan_interface_asker");
-    ros::NodeHandle nh;
+    ros::init(argc, argv, "rosplan_asker_interface");
+    ros::NodeHandle nh("~");
 
     // create PDDL action subscriber
     KCL_rosplan::RPAsker rpa(nh);
