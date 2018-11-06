@@ -17,6 +17,7 @@
   <build_depend>geometry_msgs</build_depend>
   <build_depend>rosplan_dispatch_msgs</build_depend>
   <build_depend>rosplan_knowledge_msgs</build_depend>
+  <build_depend>rosplan_planning_system</build_depend>
   <build_depend>actionlib</build_depend>
   <build_depend>kobuki_msgs</build_depend>
   <build_depend>tf</build_depend>
