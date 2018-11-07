@@ -3,6 +3,7 @@
 //
 
 #include <rosplan_interface_turtlebot/RPWaitPapers.h>
+#include <std_msgs/String.h>
 
 #include "random.h"
 #include "rosplan_interface_turtlebot/RPWaitPapers.h"
@@ -19,12 +20,16 @@ namespace KCL_rosplan {
         nh.param("busy_timeout", busy_wait_timeout, 75.0f);
         nh.getParam("people_distribution", people_distribution);
         nh.getParam("busy_distribution", busy_distribution);
-        ros::ServiceClient getPropsClient = nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>("/rosplan_knowledge_base/state/propositions");
+        getPropsClient = nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>("/rosplan_knowledge_base/state/propositions");
         getPropsClient.waitForExistence(ros::Duration(60));
         busy_pub = nh.advertise<diagnostic_msgs::KeyValue>("/isbusy_mock", 1);
         somebody_pub = nh.advertise<diagnostic_msgs::KeyValue>("/someodyat_mock", 1);
         papers_in =  nh.subscribe("/papers_loaded", 1, &RPWaitPapers::papers_cb, this);
+        speech_pub =  nh.advertise<std_msgs::String>("/speech", 1);
         papers_loaded = false;
+        update_kb = nh.serviceClient<rosplan_knowledge_msgs::KnowledgeUpdateServiceArray>("/rosplan_knowledge_base/update_array");
+        update_kb.waitForExistence(ros::Duration(60));
+        updateKBDistributions();
     }
 
     /* action dispatch callback */
@@ -38,7 +43,13 @@ namespace KCL_rosplan {
             return false;
         }
         if (attrSrv.response.attributes.size() == 0) return false;
-        std::string robot_at = attrSrv.response.attributes[0].values[0].value;
+        std::string robot_at;
+        for (size_t i = 0; i < attrSrv.response.attributes.size(); ++i) {
+            if (attrSrv.response.attributes[i].is_negative == 0) {
+                robot_at = attrSrv.response.attributes[i].values[1].value;
+                break;
+            }
+        }
         diagnostic_msgs::KeyValue kv;
         kv.key = robot_at;
 
@@ -62,14 +73,18 @@ namespace KCL_rosplan {
             ros::spinOnce();
             r.sleep();
         }
+        std_msgs::String speech;
         // complete the action
-        ROS_INFO("KCL: (%s) TUTORIAL Action completing.", msg->name.c_str());
+        ROS_INFO("KCL: (%s) Action completing.", msg->name.c_str());
         if (ros::Time::now()-start_t > timeout_t) {
             ROS_INFO("KCL: (%s) TIMEOUTED! Action failed.", msg->name.c_str());
+            speech.data = "Oh, it seems there is nobody here";
+            speech_pub.publish(speech);
             return false;
         }
 
-
+        speech.data = "Thank you";
+        speech_pub.publish(speech);
         return true;
     }
 
@@ -96,6 +111,39 @@ namespace KCL_rosplan {
     void RPWaitPapers::papers_cb(std_msgs::BoolConstPtr b) {
         papers_loaded = b->data;
     }
+
+    void RPWaitPapers::updateKBDistributions() {
+        auto kus = rosplan_knowledge_msgs::KnowledgeUpdateServiceArrayRequest();
+        for (auto it = people_distribution.begin(); it != people_distribution.end(); ++it) {
+            auto ki = rosplan_knowledge_msgs::KnowledgeItem();
+            ki.knowledge_type = ki.FUNCTION;
+            ki.attribute_name = "OCCUPATION_RATE";
+            auto kv = diagnostic_msgs::KeyValue();
+            kv.key = "w";
+            kv.value = it->first;
+            ki.values.push_back(kv);
+            ki.function_value = it->second;
+            kus.knowledge.push_back(ki);
+            kus.update_type.push_back(kus.ADD_KNOWLEDGE);
+        }
+        for (auto it = busy_distribution.begin(); it != busy_distribution.end(); ++it) {
+            auto ki = rosplan_knowledge_msgs::KnowledgeItem();
+            ki.knowledge_type = ki.FUNCTION;
+            ki.attribute_name = "BUSY_RATE";
+            auto kv = diagnostic_msgs::KeyValue();
+            kv.key = "w";
+            kv.value = it->first;
+            ki.values.push_back(kv);
+            ki.function_value = it->second;
+            kus.knowledge.push_back(ki);
+            kus.update_type.push_back(kus.ADD_KNOWLEDGE);
+        }
+        auto srvcall = rosplan_knowledge_msgs::KnowledgeUpdateServiceArray();
+        srvcall.request = kus;
+        if (not update_kb.call(srvcall)) {
+            ROS_ERROR("KCL (RPWaitPapers): Failed to call service to update Knowledge Base");
+        }
+    }
 } // close namespace
 
 /*-------------*/
@@ -103,7 +151,7 @@ namespace KCL_rosplan {
 /*-------------*/
 
 int main(int argc, char **argv) {
-    ros::init(argc, argv, "rosplan_wait_papers_action", ros::init_options::AnonymousName);
+    ros::init(argc, argv, "rosplan_wait_papers_interface");
     ros::NodeHandle nh("~");
 
     // create PDDL action subscriber

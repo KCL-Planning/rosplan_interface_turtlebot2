@@ -27,13 +27,16 @@ namespace KCL_rosplan {
         ros::ServiceClient getPropsClient;
         ros::Publisher somebody_pub;
         ros::Publisher busy_pub;
+        ros::Publisher speech_pub;
         ros::Subscriber papers_in;
+        ros::ServiceClient update_kb;
         bool papers_loaded;
 
 
         bool somebody_at(const std::string& loc);
         bool busy(const std::string& loc);
         void papers_cb(std_msgs::BoolConstPtr b);
+        void updateKBDistributions();
     public:
 
         /* constructor */
@@ -43,7 +46,6 @@ namespace KCL_rosplan {
         bool concreteCallback(const rosplan_dispatch_msgs::ActionDispatch::ConstPtr &msg);
     };
 }
-#endif
 
 
 #endif //ROSPLAN_INTERFACE_TURTLEBOT2_RPWAITPAPERS_H
