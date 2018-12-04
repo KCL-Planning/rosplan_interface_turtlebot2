@@ -23,7 +23,7 @@ namespace KCL_rosplan {
         getPropsClient = nh.serviceClient<rosplan_knowledge_msgs::GetAttributeService>("/rosplan_knowledge_base/state/propositions");
         getPropsClient.waitForExistence(ros::Duration(60));
         busy_pub = nh.advertise<diagnostic_msgs::KeyValue>("/isbusy_mock", 1);
-        somebody_pub = nh.advertise<diagnostic_msgs::KeyValue>("/someodyat_mock", 1);
+        somebody_pub = nh.advertise<diagnostic_msgs::KeyValue>("/somebodyat_mock", 1);
         papers_in =  nh.subscribe("/papers_loaded", 1, &RPWaitPapers::papers_cb, this);
         speech_pub =  nh.advertise<std_msgs::String>("/speech", 1);
         papers_loaded = false;
@@ -59,17 +59,17 @@ namespace KCL_rosplan {
         if (printer_busy) timeout_t = ros::Duration(busy_wait_timeout);
         else timeout_t = ros::Duration(timeout);
 
-        bool found_somebody = printer_busy or somebody_at(robot_at);
+        /*bool found_somebody = printer_busy or somebody_at(robot_at);
         if (found_somebody) kv.value = "yes";
         else kv.value = "no";
         somebody_pub.publish(kv);
         if (printer_busy) kv.value = "yes";
         else kv.value = "no";
-        busy_pub.publish(kv);
+        busy_pub.publish(kv);*/
 
         ros::Rate r(10);
         while (ros::Time::now()-start_t < timeout_t) {
-            if (found_somebody && papers_loaded) return true;
+            if (/*found_somebody && */papers_loaded) break;
             ros::spinOnce();
             r.sleep();
         }
@@ -110,6 +110,7 @@ namespace KCL_rosplan {
 
     void RPWaitPapers::papers_cb(std_msgs::BoolConstPtr b) {
         papers_loaded = b->data;
+	    ROS_INFO_STREAM("Got message: "  << papers_loaded);
     }
 
     void RPWaitPapers::updateKBDistributions() {
