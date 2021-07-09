@@ -53,7 +53,7 @@ namespace  KCL_rosplan {
             // publish feedback (enabled)
             rosplan_dispatch_msgs::ActionFeedback fb;
             fb.action_id = msg->action_id;
-            fb.status = "action enabled";
+            fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_ENABLED;
             action_feedback_pub.publish(fb);
 
             speak(to_say);
@@ -72,7 +72,7 @@ namespace  KCL_rosplan {
 
             // publish feedback (achieved)
             fb.action_id = msg->action_id;
-            fb.status = "action achieved";
+            fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_SUCCEEDED_TO_GOAL_STATE;
             action_feedback_pub.publish(fb);
         }
     }

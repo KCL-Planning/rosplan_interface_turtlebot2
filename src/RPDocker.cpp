@@ -48,7 +48,7 @@ namespace KCL_rosplan {
 			// publish feedback (enabled)
 			rosplan_dispatch_msgs::ActionFeedback fb;
 			fb.action_id = msg->action_id;
-			fb.status = "action enabled";
+			fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_ENABLED;
 			action_feedback_pub.publish(fb);
 
 			bool finished_before_timeout = action_client.waitForResult(ros::Duration(/*5*msg->duration*/50));
@@ -81,7 +81,7 @@ namespace KCL_rosplan {
 					// publish feedback (achieved)
 					 rosplan_dispatch_msgs::ActionFeedback fb;
 					fb.action_id = msg->action_id;
-					fb.status = "action achieved";
+					fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_SUCCEEDED_TO_GOAL_STATE;
 					action_feedback_pub.publish(fb);
 
 				} else {
@@ -89,7 +89,7 @@ namespace KCL_rosplan {
 					// publish feedback (failed)
 					rosplan_dispatch_msgs::ActionFeedback fb;
 					fb.action_id = msg->action_id;
-					fb.status = "action failed";
+					fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_FAILED;
 					action_feedback_pub.publish(fb);
 
 				}
@@ -101,7 +101,7 @@ namespace KCL_rosplan {
 				// publish feedback (failed)
 				rosplan_dispatch_msgs::ActionFeedback fb;
 				fb.action_id = msg->action_id;
-				fb.status = "action failed";
+				fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_FAILED;
 				action_feedback_pub.publish(fb);
 
 				ROS_INFO("KCL: (Docker) action timed out");
@@ -118,7 +118,7 @@ namespace KCL_rosplan {
 			// publish feedback (enabled)
 			rosplan_dispatch_msgs::ActionFeedback fb;
 			fb.action_id = msg->action_id;
-			fb.status = "action enabled";
+			fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_ENABLED;
 			action_feedback_pub.publish(fb);
 
 			geometry_msgs::Twist base_cmd;
@@ -156,7 +156,7 @@ namespace KCL_rosplan {
 			big_rate.sleep();
 
 			// publish feedback (achieved)
-			fb.status = "action achieved";
+			fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_SUCCEEDED_TO_GOAL_STATE;
 			action_feedback_pub.publish(fb);
 		}
 	}
