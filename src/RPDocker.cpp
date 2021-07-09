@@ -27,17 +27,17 @@ namespace KCL_rosplan {
 		// dock the kobuki
 		if(0==msg->name.compare("dock")) {
 
-			ROS_INFO("KCL: (Docker) action received");
+			ROS_INFO("KCL: (Docker) action received - dock");
 
 			// Check robot name
 			bool right_robot = false;
 			for(size_t i=0; i<msg->parameters.size(); i++) {
-				if(0==msg->parameters[i].key.compare("v") && 0==msg->parameters[i].value.compare(name)) {
+				if(0==msg->parameters[i].value.compare(name)) {
 					right_robot = true;
 				}
 			}
 			if(!right_robot) {
-				ROS_DEBUG("KCL: (Docker) aborting action dispatch; handling robot %s", name.c_str());
+				ROS_WARN("KCL: (Docker) aborting action dispatch; handling robot %s", name.c_str());
 				return;
 			}
 
@@ -48,14 +48,14 @@ namespace KCL_rosplan {
 			// publish feedback (enabled)
 			rosplan_dispatch_msgs::ActionFeedback fb;
 			fb.action_id = msg->action_id;
-			fb.status = "action enabled";
+			fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_ENABLED;
 			action_feedback_pub.publish(fb);
 
-			bool finished_before_timeout = action_client.waitForResult(ros::Duration(5*msg->duration));
+			bool finished_before_timeout = action_client.waitForResult(ros::Duration(/*5*msg->duration*/50));
 			if (finished_before_timeout) {
 
 				actionlib::SimpleClientGoalState state = action_client.getState();
-				ROS_INFO("KCL: (Docker) action finished: %s", state.toString().c_str());
+				ROS_INFO("KCL: (Docker) action finished: %s - dock", state.toString().c_str());
 
 				if(state == actionlib::SimpleClientGoalState::SUCCEEDED) {
 
@@ -81,7 +81,7 @@ namespace KCL_rosplan {
 					// publish feedback (achieved)
 					 rosplan_dispatch_msgs::ActionFeedback fb;
 					fb.action_id = msg->action_id;
-					fb.status = "action achieved";
+					fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_SUCCEEDED_TO_GOAL_STATE;
 					action_feedback_pub.publish(fb);
 
 				} else {
@@ -89,7 +89,7 @@ namespace KCL_rosplan {
 					// publish feedback (failed)
 					rosplan_dispatch_msgs::ActionFeedback fb;
 					fb.action_id = msg->action_id;
-					fb.status = "action failed";
+					fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_FAILED;
 					action_feedback_pub.publish(fb);
 
 				}
@@ -101,7 +101,7 @@ namespace KCL_rosplan {
 				// publish feedback (failed)
 				rosplan_dispatch_msgs::ActionFeedback fb;
 				fb.action_id = msg->action_id;
-				fb.status = "action failed";
+				fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_FAILED;
 				action_feedback_pub.publish(fb);
 
 				ROS_INFO("KCL: (Docker) action timed out");
@@ -113,12 +113,12 @@ namespace KCL_rosplan {
 		// undock the kobuki
 		else if(0==msg->name.compare("undock")) {
 
-			ROS_INFO("KCL: (Docker) action recieved");
+			ROS_INFO("KCL: (Docker) action recieved - undock");
 
 			// publish feedback (enabled)
 			rosplan_dispatch_msgs::ActionFeedback fb;
 			fb.action_id = msg->action_id;
-			fb.status = "action enabled";
+			fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_ENABLED;
 			action_feedback_pub.publish(fb);
 
 			geometry_msgs::Twist base_cmd;
@@ -133,7 +133,7 @@ namespace KCL_rosplan {
 				count++;
 			}
 
-			ROS_INFO("KCL: (Localiser) action complete");
+			ROS_INFO("KCL: (Docker) action complete - undock");
 
 			// add predicate
 			rosplan_knowledge_msgs::KnowledgeUpdateService updatePredSrv;
@@ -156,7 +156,7 @@ namespace KCL_rosplan {
 			big_rate.sleep();
 
 			// publish feedback (achieved)
-			fb.status = "action achieved";
+			fb.status = rosplan_dispatch_msgs::ActionFeedback::ACTION_SUCCEEDED_TO_GOAL_STATE;
 			action_feedback_pub.publish(fb);
 		}
 	}
